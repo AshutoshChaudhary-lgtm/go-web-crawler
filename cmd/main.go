@@ -32,6 +32,10 @@ func main() {
 
 	crawler := manager.NewManager(*depth, *concurrency, *userAgent, *timeout, *outputFile)
 
+	if !crawler.CheckRobotsTxt(*startURL) {
+		log.Fatalf("Crawling disallowed by robots.txt")
+	}
+
 	err := crawler.ManageCrawl(*startURL, 0)
 	if err != nil {
 		log.Fatalf("Error during crawling: %v", err)

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -82,6 +83,9 @@ func (m *Manager) ManageCrawl(startURL string, currentDepth int) error {
 
 	m.saveURL(startURL)
 
+	// Polite crawling: Add a delay between requests
+	time.Sleep(2 * time.Second)
+
 	return nil
 }
 
@@ -136,4 +140,47 @@ func (m *Manager) saveURL(url string) {
 	if _, err := file.WriteString(url + "\n"); err != nil {
 		fmt.Printf("Error writing to output file: %v\n", err)
 	}
+}
+
+func (m *Manager) CheckRobotsTxt(startURL string) bool {
+	parsedURL, err := url.Parse(startURL)
+	if err != nil {
+		fmt.Printf("Error parsing URL: %v\n", err)
+		return false
+	}
+
+	robotsURL := fmt.Sprintf("%s://%s/robots.txt", parsedURL.Scheme, parsedURL.Host)
+	resp, err := http.Get(robotsURL)
+	if err != nil {
+		fmt.Printf("Error fetching robots.txt: %v\n", err)
+		return false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return false
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("Error reading robots.txt: %v\n", err)
+		return false
+	}
+
+	robotsTxt := string(body)
+	lines := strings.Split(robotsTxt, "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "User-agent: *") {
+			for _, rule := range lines {
+				if strings.HasPrefix(rule, "Disallow: ") {
+					disallowedPath := strings.TrimPrefix(rule, "Disallow: ")
+					if strings.HasPrefix(parsedURL.Path, disallowedPath) {
+						return false
+					}
+				}
+			}
+		}
+	}
+
+	return true
 }
