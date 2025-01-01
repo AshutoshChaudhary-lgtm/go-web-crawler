@@ -16,6 +16,7 @@ func main() {
 	userAgent := flag.String("user-agent", "Go-Web-Crawler", "The User-Agent string for HTTP requests")
 	timeout := flag.Duration("timeout", 10*time.Second, "The timeout for HTTP requests")
 	outputFile := flag.String("output", "output.txt", "The file to save crawled URLs")
+	impolite := flag.Bool("impolite", false, "Ignore robots.txt rules")
 
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [options]\n", os.Args[0])
@@ -32,7 +33,7 @@ func main() {
 
 	crawler := manager.NewManager(*depth, *concurrency, *userAgent, *timeout, *outputFile)
 
-	if !crawler.CheckRobotsTxt(*startURL) {
+	if !*impolite && !crawler.CheckRobotsTxt(*startURL) {
 		log.Fatalf("Crawling disallowed by robots.txt")
 	}
 

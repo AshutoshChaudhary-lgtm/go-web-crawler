@@ -42,7 +42,7 @@ go-web-crawler
 ## Usage
 To run the crawler, use the following command:
 ```sh
-./crawler --url <start-url> --depth <depth> --concurrency <concurrency> --user-agent <user-agent> --timeout <timeout> --output <output-file>
+./crawler --url <start-url> --depth <depth> --concurrency <concurrency> --user-agent <user-agent> --timeout <timeout> --output <output-file> [--impolite]
 ```
 
 ### Example
@@ -50,12 +50,17 @@ To run the crawler, use the following command:
 ./crawler --url https://example.com --depth 2 --concurrency 5 --user-agent "MyCrawler" --timeout 15s --output results.txt
 ```
 
+### Example (Ignoring robots.txt)
+```sh
+./crawler --url https://example.com --depth 2 --concurrency 5 --user-agent "MyCrawler" --timeout 15s --output results.txt --impolite
+```
+
 ## Core Functionalities
 - **Fetching**: The `Fetcher` struct sends HTTP GET requests to specified URLs and retrieves HTML content.
 - **Parsing**: The `Parser` struct processes the HTML content and returns a structured representation of the document.
 - **Extracting Links**: The `Extractor` struct extracts all links from the parsed HTML document.
 - **Managing Crawls**: The `Manager` struct oversees the crawling process, tracking visited URLs and implementing crawling strategies.
-- **Respecting robots.txt**: The `Manager` struct checks the `robots.txt` file of the website to ensure compliance with the site's crawling policies.
+- **Respecting robots.txt**: The `Manager` struct checks the `robots.txt` file of the website to ensure compliance with the site's crawling policies, unless the `--impolite` flag is used.
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
